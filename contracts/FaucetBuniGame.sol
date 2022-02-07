@@ -49,7 +49,12 @@ contract  FaucetBuniGame is Initializable, AccessControlUpgradeable {
         trainerRoller = _trainerRoller;
     }
 
-    function mintBunicorn(uint8 quantity) public {
+    function setEmergencyPause(bool _isEmergencyPause) public onlyAdmin {
+        require(_isEmergencyPause != isEmergencyPause, 'Same value');
+        isEmergencyPause = _isEmergencyPause;
+    }
+
+    function mintBunicorn(uint8 quantity) public notInEmergencyPause {
         require(quantity <= maxMintedBunicorn, "Too much bunicorns");
         require(numberOfMintedBunicorn[msg.sender] <= maxMintedBunicorn - quantity, "Too much bunicorns");
         for (uint8 i = 0; i < quantity; i++) {
@@ -60,7 +65,7 @@ contract  FaucetBuniGame is Initializable, AccessControlUpgradeable {
         numberOfMintedBunicorn[msg.sender] += quantity;
     }
 
-    function mintTrainer(uint8 quantity) public {
+    function mintTrainer(uint8 quantity) public notInEmergencyPause {
         require(quantity <= maxMintedTrainer, "Too much trainers");
         require(numberOfMintedTrainer[msg.sender] <= maxMintedTrainer - quantity, "Too much trainers");
         for (uint8 i = 0; i < quantity; i++) {
@@ -73,7 +78,7 @@ contract  FaucetBuniGame is Initializable, AccessControlUpgradeable {
         numberOfMintedTrainer[msg.sender] += quantity;
     }
 
-    function mintBur(uint256 quantity) public {
+    function mintBur(uint256 quantity) public notInEmergencyPause {
         require(quantity <= maxMintedBur, "Too much bur");
         require(numberOfMintedBur[msg.sender] <= maxMintedBur - quantity, "Too much bur");
         burToken.mint(msg.sender, quantity);

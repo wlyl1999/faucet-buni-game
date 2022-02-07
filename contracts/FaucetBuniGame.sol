@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
 import "./interfaces/IBunicornRoller.sol";
 import "./interfaces/ITrainerRoller.sol";
+import "./interfaces/IBurToken.sol";
 
 contract  FaucetBuniGame is Initializable, AccessControlUpgradeable {
     using SafeMathUpgradeable for uint256;
@@ -18,6 +19,10 @@ contract  FaucetBuniGame is Initializable, AccessControlUpgradeable {
     ITrainerRoller public trainerRoller;
     mapping(address => uint8) public numberOfMintedTrainer;
     uint8 public maxMintedTrainer = 10;
+
+    IBurToken public burToken;
+    mapping(address => uint256) public numberOfMintedBur;
+    uint256 public maxMintedBur = 10000 ether;
 
     bool public isEmergencyPause;
     bytes32 public constant ROLE_ADMIN = keccak256("ROLE_ADMIN");
@@ -66,5 +71,12 @@ contract  FaucetBuniGame is Initializable, AccessControlUpgradeable {
             trainersContract.mintOneTrainerBySpecsByAdmin(msg.sender, element, level);
         }
         numberOfMintedTrainer[msg.sender] += quantity;
+    }
+
+    function mintBur(uint256 quantity) public {
+        require(quantity <= maxMintedBur, "Too much bur");
+        require(numberOfMintedBur[msg.sender] <= maxMintedBur - quantity, "Too much bur");
+        burToken.mint(msg.sender, quantity);
+        numberOfMintedBur[msg.sender] += quantity;
     }
 }

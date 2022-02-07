@@ -9,6 +9,7 @@ import "./interfaces/IBunicornRoller.sol";
 import "./interfaces/ITrainerRoller.sol";
 import "./interfaces/IBurToken.sol";
 import "./interfaces/IBuniToken.sol";
+import "./interfaces/IGachaToken.sol";
 
 contract  FaucetBuniGame is Initializable, AccessControlUpgradeable {
     using SafeMathUpgradeable for uint256;
@@ -29,6 +30,10 @@ contract  FaucetBuniGame is Initializable, AccessControlUpgradeable {
     mapping(address => uint256) public numberOfMintedBuni;
     uint256 public maxMintedBuni = 10000 ether;
 
+    IGachaToken public gachaToken;
+    mapping(address => uint256) public numberOfMintedGacha;
+    uint256 public maxMintedGacha = 100;
+
     bool public isEmergencyPause;
     bytes32 public constant ROLE_ADMIN = keccak256("ROLE_ADMIN");
     
@@ -44,7 +49,10 @@ contract  FaucetBuniGame is Initializable, AccessControlUpgradeable {
 
     function initialize(
         IBunicornRoller _bunicornRoller,
-        ITrainerRoller _trainerRoller
+        ITrainerRoller _trainerRoller,
+        IBuniToken _buniToken,
+        IBurToken _burToken,
+        IGachaToken _gachaToken
     ) public initializer {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -52,6 +60,29 @@ contract  FaucetBuniGame is Initializable, AccessControlUpgradeable {
 
         bunicornRoller = _bunicornRoller;
         trainerRoller = _trainerRoller;
+        buniToken = _buniToken;
+        burToken = _burToken;
+        gachaToken = _gachaToken;
+    }
+
+    function setMaxBuniMinted(uint256 _maxMintedBuni) public onlyAdmin {
+        maxMintedBuni = _maxMintedBuni;
+    }
+
+    function setMaxBurMinted(uint256 _maxMintedBur) public onlyAdmin {
+        maxMintedBur = _maxMintedBur;
+    }
+
+    function setMaxGachaMinted(uint256 _maxMintedGacha) public onlyAdmin {
+        maxMintedGacha = _maxMintedGacha;
+    }
+
+    function setMaxTrainerMinted(uint8 _maxMintedTrainer) public onlyAdmin {
+        maxMintedTrainer = _maxMintedTrainer;
+    }
+
+    function setMaxBunicornMinted(uint8 _maxMintedBunicorn) public onlyAdmin {
+        maxMintedBunicorn = _maxMintedBunicorn;
     }
 
     function setEmergencyPause(bool _isEmergencyPause) public onlyAdmin {
@@ -95,5 +126,12 @@ contract  FaucetBuniGame is Initializable, AccessControlUpgradeable {
         require(numberOfMintedBuni[msg.sender] <= maxMintedBuni - quantity, "Too much buni");
         buniToken.mint(msg.sender, quantity);
         numberOfMintedBuni[msg.sender] += quantity;
+    }
+
+    function mintGacha(uint256 quantity) public notInEmergencyPause {
+        require(quantity <= maxMintedGacha, "Too much gacha");
+        require(numberOfMintedGacha[msg.sender] <= maxMintedGacha - quantity, "Too much gacha");
+        gachaToken.mint(msg.sender, quantity);
+        numberOfMintedGacha[msg.sender] += quantity;
     }
 }

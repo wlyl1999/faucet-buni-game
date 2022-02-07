@@ -13,6 +13,7 @@ import "./interfaces/IGachaToken.sol";
 
 contract  FaucetBuniGame is Initializable, AccessControlUpgradeable {
     using SafeMathUpgradeable for uint256;
+    using SafeMathUpgradeable for uint8;
 
     IBunicornRoller public bunicornRoller;
     mapping (address => uint8) public numberOfMintedBunicorn;
@@ -91,8 +92,7 @@ contract  FaucetBuniGame is Initializable, AccessControlUpgradeable {
     }
 
     function mintBunicorn(uint8 quantity) public notInEmergencyPause {
-        require(quantity <= maxMintedBunicorn, "Too much bunicorns");
-        require(numberOfMintedBunicorn[msg.sender] <= maxMintedBunicorn - quantity, "Too much bunicorns");
+        require(numberOfMintedBunicorn[msg.sender].add(quantity) <= maxMintedBunicorn, "Too much bunicorns");
         for (uint8 i = 0; i < quantity; i++) {
             uint256 seed = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender, i + numberOfMintedBunicorn[msg.sender])));
             uint8 star = uint8(seed % 5);
@@ -102,8 +102,7 @@ contract  FaucetBuniGame is Initializable, AccessControlUpgradeable {
     }
 
     function mintTrainer(uint8 quantity) public notInEmergencyPause {
-        require(quantity <= maxMintedTrainer, "Too much trainers");
-        require(numberOfMintedTrainer[msg.sender] <= maxMintedTrainer - quantity, "Too much trainers");
+        require(numberOfMintedTrainer[msg.sender].add(quantity) <= maxMintedTrainer, "Too much trainers");
         for (uint8 i = 0; i < quantity; i++) {
             uint256 seed = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender, i + numberOfMintedTrainer[msg.sender])));
             uint8 element = uint8(seed % 4);
@@ -115,22 +114,19 @@ contract  FaucetBuniGame is Initializable, AccessControlUpgradeable {
     }
 
     function mintBur(uint256 quantity) public notInEmergencyPause {
-        require(quantity <= maxMintedBur, "Too much bur");
-        require(numberOfMintedBur[msg.sender] <= maxMintedBur - quantity, "Too much bur");
+        require(numberOfMintedBur[msg.sender].add(quantity) <= maxMintedBur, "Too much bur");
         burToken.mint(msg.sender, quantity);
         numberOfMintedBur[msg.sender] += quantity;
     }
 
     function mintBuni(uint256 quantity) public notInEmergencyPause {
-        require(quantity <= maxMintedBuni, "Too much buni");
-        require(numberOfMintedBuni[msg.sender] <= maxMintedBuni - quantity, "Too much buni");
+        require(numberOfMintedBuni[msg.sender].add(quantity) <= maxMintedBuni, "Too much buni");
         buniToken.mint(msg.sender, quantity);
         numberOfMintedBuni[msg.sender] += quantity;
     }
 
     function mintGacha(uint256 quantity) public notInEmergencyPause {
-        require(quantity <= maxMintedGacha, "Too much gacha");
-        require(numberOfMintedGacha[msg.sender] <= maxMintedGacha - quantity, "Too much gacha");
+        require(numberOfMintedGacha[msg.sender].add(quantity) <= maxMintedGacha, "Too much gacha");
         gachaToken.mint(msg.sender, quantity);
         numberOfMintedGacha[msg.sender] += quantity;
     }

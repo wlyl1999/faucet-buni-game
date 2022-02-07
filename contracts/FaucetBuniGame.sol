@@ -61,7 +61,7 @@ contract  FaucetBuniGame is Initializable, AccessControlUpgradeable {
         for (uint8 i = 0; i < quantity; i++) {
             uint256 seed = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender, i + numberOfMintedTrainer[msg.sender])));
             uint8 element = uint8(seed % 4);
-            uint8 level = uint8(uint256(keccak256(abi.encodePacked(gasleft(), seed))) % 20);
+            uint8 level = uint8(uint256(keccak256(abi.encodePacked(gasleft(), seed))) % 50);
             ITrainersV2 trainersContract = trainerRoller.getTrainersContract();
             trainersContract.mintOneTrainerBySpecsByAdmin(msg.sender, element, level);
         }
